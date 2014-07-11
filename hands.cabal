@@ -17,7 +17,7 @@ cabal-version:       >=1.10
 
 executable hands
   main-is:             Main.hs
-  other-modules:       Handler.Post
+  other-modules:       Handler.Posts
                        Model.Fields
                        Model.Post
                        Util
