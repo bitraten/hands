@@ -17,9 +17,29 @@ cabal-version:       >=1.10
 
 executable hands
   main-is:             Main.hs
-  -- other-modules:       
+  other-modules:       Handler.Post
+                       Model.Fields
+                       Model.Post
+                       Util
+                       View.Application
+                       View.Error
+                       View.Posts
   -- other-extensions:    
-  build-depends:       base >=4.7 && <4.8,
-                       Spock
+  build-depends:       aeson,
+                       base >=4.7 && <4.8,
+                       blaze-html,
+                       blaze-markup,
+                       http-types,
+                       monad-logger,
+                       network,
+                       persistent,
+                       persistent-sqlite,
+                       persistent-template,
+                       resourcet,
+                       Spock,
+                       Spock-auth >=0.2,
+                       text,
+                       time,
+                       wai-middleware-static
   hs-source-dirs:      src
   default-language:    Haskell2010
