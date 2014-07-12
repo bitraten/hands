@@ -29,6 +29,7 @@ executable hands
                        base >=4.7 && <4.8,
                        blaze-html,
                        blaze-markup,
+                       filepath,
                        http-types,
                        monad-logger,
                        network,

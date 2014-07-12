@@ -18,14 +18,21 @@ index = do
     let title = "index"
     myBlaze title $ View.Posts.index posts
 
-show :: T.Text -> WebAction ()
-show slug = do
-    host <- hostname
+show :: T.Text -> RequestedFormat T.Text -> WebAction ()
+show host (HtmlRequested slug) = do
+    -- TYPE Host, Slug...
     post <- runSQL $ loadPost host slug
     let title = "Post"
     case post of
         Just p  -> myBlaze title . View.Posts.show $ entityVal p
         _       -> show404
+show host (JsonRequested slug) = do
+    post <- runSQL $ loadPost host slug
+    case post of
+        Just p  -> json $ entityVal p
+        -- How about a JSON error?
+        _       -> show404
+show _ _ = show404
 
 -- TODO Multiple Tags
 tagged tag = undefined

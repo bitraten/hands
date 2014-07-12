@@ -18,7 +18,6 @@ main = do pool <- createSqlitePool "hands.db" 5
           spock 3000 sessCfg (PCConduitPool pool) () $ do
             middleware (staticPolicy mempty)
             blogHandlers
---            apiHandlers
           where
             sessCfg = authSessCfg (AuthCfg (5 * 60 * 60) ())
 
@@ -27,11 +26,9 @@ blogHandlers = do
         get "/" Posts.index
         get "/:slug" $
             do  Just slug <- param "slug"
-                Posts.show slug
+                host <- hostname
+                Posts.show host $ requestedFormat slug
         get "/tag/:tag" $
             do  Just tag <- param "tag"
 --                blaze $ Posts.tagged tag
                 text tag
-
-apiHandlers :: WebApp
-apiHandlers = undefined
