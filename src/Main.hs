@@ -39,8 +39,7 @@ blogHandlers = do
                 _       -> text host
         get "/{slug:^[a-z]{3}[0-9]{3}(\\.[a-z]+)?$}" $
             do  Just slug <- param "slug"
-                host <- hostname
-                Posts.show host $ requestedFormat slug
+                hostname >>= ($ requestedFormat slug) . Posts.show
         get "/tag/:tag" $
             do  Just tag <- param "tag"
 --                blaze $ Posts.tagged tag
