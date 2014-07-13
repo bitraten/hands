@@ -20,6 +20,7 @@ executable hands
   other-modules:       Handler.Posts
                        Model.Fields
                        Model.Post
+                       Model.User
                        Util
                        View.Application
                        View.Error
