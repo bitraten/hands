@@ -27,7 +27,7 @@ User
 |]
 
 instance ToJSON (UserGeneric backend) where
-    toJSON u = object ["displayName" .= userDisplay_name u,
+    toJSON u = object ["display_name" .= userDisplay_name u,
                        "domain" .= userDomain u,
                        "locale" .= userLocale u,
                        "url" .= userUrl u
