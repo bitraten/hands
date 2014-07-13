@@ -12,24 +12,18 @@ import qualified View.Posts
 import Web.Spock
 
 index :: RequestedFormat () -> WebAction ()
-index (HtmlRequested ()) = do
-    host <- hostname
-    posts <- loadPosts host
-    let title = "index"
-    myBlaze title $ View.Posts.index posts
-index (JsonRequested ()) = do
-    host <- hostname
-    posts <- loadPosts host
-    json posts
+index (HtmlRequested ()) =
+    hostname >>= loadPosts >>= myBlaze "index" . View.Posts.index
+index (JsonRequested ()) =
+    hostname >>= loadPosts >>= json
 index _ = show404
 
 show :: T.Text -> RequestedFormat T.Text -> WebAction ()
 show host (HtmlRequested slug) = do
     -- TYPE Host, Slug...
     post <- runSQL $ loadPost host slug
-    let title = "Post"
     case post of
-        Just p  -> myBlaze title . View.Posts.show $ entityVal p
+        Just p  -> myBlaze "Post" . View.Posts.show $ entityVal p
         _       -> show404
 show host (JsonRequested slug) = do
     post <- runSQL $ loadPost host slug
