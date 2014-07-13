@@ -11,12 +11,17 @@ import Util
 import qualified View.Posts
 import Web.Spock
 
-index :: WebAction ()
-index = do
+index :: RequestedFormat () -> WebAction ()
+index (HtmlRequested ()) = do
     host <- hostname
-    posts <- fmap (map entityVal) $ runSQL $ loadPosts host
+    posts <- loadPosts host
     let title = "index"
     myBlaze title $ View.Posts.index posts
+index (JsonRequested ()) = do
+    host <- hostname
+    posts <- loadPosts host
+    json posts
+index _ = show404
 
 show :: T.Text -> RequestedFormat T.Text -> WebAction ()
 show host (HtmlRequested slug) = do
@@ -40,5 +45,5 @@ tagged tag = undefined
 loadPost :: T.Text -> T.Text -> SqlPersistM (Maybe (Entity Post))
 loadPost host slug = selectFirst [PostSlug ==. slug, PostDomain ==. host] []
 
-loadPosts :: T.Text -> SqlPersistM [(Entity Post)]
-loadPosts host = selectList [PostDomain ==. host] []
+loadPosts :: T.Text -> WebAction [Post]
+loadPosts host = fmap (map entityVal) $ runSQL $ selectList [PostDomain ==. host] []

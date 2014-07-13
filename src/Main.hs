@@ -3,9 +3,11 @@ module Main where
 
 import qualified Handler.Posts as Posts
 import Model.Post
+import Model.User
 import Control.Monad.Logger
 import Data.Monoid (mempty)
 import Database.Persist.Sqlite hiding (get) 
+import Network.HTTP.Types.Status
 import Network.Wai.Middleware.Static
 import Util
 import Web.Spock
@@ -23,8 +25,19 @@ main = do pool <- createSqlitePool "hands.db" 5
 
 blogHandlers :: WebApp
 blogHandlers = do      
-        get "/" Posts.index
-        get "/:slug" $
+        get "/" $ Posts.index $ HtmlRequested ()
+        get "/posts" $ do
+            setStatus movedPermanently301
+            setHeader "Location" "/"
+        get "/posts.json" $
+               Posts.index $ JsonRequested ()
+        get "/user.json" $ do
+            host <- hostname
+            user <- runSQL $ selectFirst [UserDomain ==. host] []
+            case user of
+                Just u  -> json $ entityVal u
+                _       -> text host
+        get "/{slug:^[a-z]{3}[0-9]{3}(\\.[a-z]+)?$}" $
             do  Just slug <- param "slug"
                 host <- hostname
                 Posts.show host $ requestedFormat slug
