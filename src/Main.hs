@@ -18,7 +18,7 @@ main :: IO ()
 main = do pool <- createSqlitePool "hands.db" 5
           runNoLoggingT $ runSqlPool (runMigration migratePost) pool
           spock 3000 sessCfg (PCConduitPool pool) () $ do
-            middleware (staticPolicy mempty)
+            middleware (staticPolicy $ addBase "public")
             blogHandlers
           where
             sessCfg = authSessCfg (AuthCfg (5 * 60 * 60) ())
