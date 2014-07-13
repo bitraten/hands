@@ -25,7 +25,7 @@ show post = do
                 li ! class_ "post-time" $ do
                     a ! href "" $ "date"
                     a ! href "" $ "time"
-        (div ! class_ "post-body") . toHtml $ postBody_html post
+        (div ! class_ "post-body") . preEscapedToHtml $ postBody_html post
         ul ! class_ "post-actions" $ do
             li ! class_ "post-edit-link" $ do
                 a ! href "" $ "edit"
