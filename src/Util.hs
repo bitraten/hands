@@ -19,6 +19,7 @@ type WebAction a = SpockAction Connection (VisitorSession () ()) () a
 data RequestedFormat a =  HtmlRequested a | JsonRequested a | MdRequested a
                         | OtherRequested a
 
+runSQL :: SqlPersistT (NoLoggingT (ResourceT IO)) a -> WebAction a
 runSQL action =
     runQuery $ \conn ->
         runResourceT $ runNoLoggingT $ runSqlConn action conn
@@ -29,13 +30,6 @@ requestedFormat text = case (splitExtension $ T.unpack text) of
                     (name, ".md")    -> MdRequested $ T.pack name
                     (name, "")       -> HtmlRequested $ T.pack name
                     _                -> OtherRequested text
-
-hostname :: WebAction T.Text
-hostname = do
-    host <- header "Host"
-    case (host) of
-        Just h -> return h
-        Nothing -> return T.empty
 
 myBlaze :: Html -> Html -> WebAction ()
 myBlaze t c  = blaze $ View.Application.html t c

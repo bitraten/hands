@@ -16,7 +16,7 @@ import Web.Spock.Auth
 
 main :: IO ()
 main = do pool <- createSqlitePool "hands.db" 5
-          runNoLoggingT $ runSqlPool (runMigration migratePost) pool
+          runNoLoggingT $ runSqlPool (runMigration (migratePost >> migrateUsers)) pool
           spock 3000 sessCfg (PCConduitPool pool) () $ do
             middleware (staticPolicy $ addBase "public")
             blogHandlers
@@ -25,22 +25,25 @@ main = do pool <- createSqlitePool "hands.db" 5
 
 blogHandlers :: WebApp
 blogHandlers = do      
-        get "/" $ Posts.index $ HtmlRequested ()
+        get "/" $ requireUser $ Posts.index $ HtmlRequested ()
         get "/posts" $ do
             setStatus movedPermanently301
             setHeader "Location" "/"
         get "/posts.json" $
-               Posts.index $ JsonRequested ()
-        get "/user.json" $ do
-            host <- hostname
-            user <- runSQL $ selectFirst [UserDomain ==. host] []
-            case user of
-                Just u  -> json $ entityVal u
-                _       -> text host
+              requireUser $ Posts.index $ JsonRequested ()
+        get "/user.json" $ requireUser json
         get "/{slug:^[a-z]{3}[0-9]{3}(\\.[a-z]+)?$}" $
             do  Just slug <- param "slug"
-                hostname >>= ($ requestedFormat slug) . Posts.show
+                requireUser $ Posts.show $ requestedFormat slug
         get "/tag/:tag" $
             do  Just tag <- param "tag"
 --                blaze $ Posts.tagged tag
                 text tag
+
+requireUser :: (User -> WebAction ()) -> WebAction ()
+                        -- Maybe chaining?
+requireUser action = do Just host <- header "Host"
+                        user <- loadUser host
+                        case user of
+                            Just u -> action u
+                            Nothing -> show404
