@@ -46,4 +46,5 @@ requireUser action = do Just host <- header "Host"
                         user <- loadUser host
                         case user of
                             Just u -> action u
-                            Nothing -> show404
+                            -- redirect?
+                            Nothing -> text "Hostname Error."

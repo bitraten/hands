@@ -4,16 +4,17 @@ module View.Posts where
 import Prelude hiding (show, div)
 import Control.Monad (forM_)
 import Model.Post
+import Model.User
 import Text.Blaze.Html5
 import Text.Blaze.Html5.Attributes
 
-index :: [Post] -> Html
-index posts = do
-    ul $ forM_ posts $ do
-        show
+index :: User -> [Post] -> Html
+index user posts = do
+    forM_ posts $ do
+        show user
 
-show :: Post -> Html
-show post = do
+show :: User -> Post -> Html
+show user post = do
     article ! class_ "post" $ do
         header $ do
             div ! class_ "post-avatar" $ do

@@ -36,10 +36,10 @@ requestedFormat text = case (splitExtension $ T.unpack text) of
                     (name, "")       -> HtmlRequested $ T.pack name
                     _                -> OtherRequested text
 
-myBlaze :: Html -> Html -> WebAction ()
-myBlaze t c  = blaze $ View.Application.html t c
+myBlaze :: User -> Html -> Html -> WebAction ()
+myBlaze = ((blaze .) .) . View.Application.html
 
-show404 :: WebAction ()
-show404 = do
+show404 :: User -> WebAction ()
+show404 user = do
     setStatus notFound404
-    myBlaze "Error" $ View.Error.show "Not Found."
+    myBlaze user "Error" $ View.Error.show "Not Found."

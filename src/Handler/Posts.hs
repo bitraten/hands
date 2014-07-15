@@ -14,25 +14,26 @@ import Web.Spock
 
 index :: RequestedFormat () -> User -> WebAction ()
 index (HtmlRequested ()) user =
-    loadPosts user >>= myBlaze "index" . View.Posts.index
+    loadPosts user >>= myBlaze user "index" . View.Posts.index user
 index (JsonRequested ()) user =
     loadPosts user >>= json
-index _ _ = show404
+index _ user = show404 user
 
 show :: RequestedFormat T.Text -> User -> WebAction ()
-show (HtmlRequested slug) user = do
-    -- TYPE Host, Slug...
-    post <- runSQL $ loadPost user slug
-    case post of
-        Just p  -> myBlaze "Post" . View.Posts.show $ entityVal p
-        _       -> show404
-show (JsonRequested slug) user = do
-    post <- runSQL $ loadPost user slug
-    case post of
-        Just p  -> json $ entityVal p
-        -- How about a JSON error?
-        _       -> show404
-show _ _ = show404
+show (HtmlRequested slug) user =
+    -- TYPE Slug…
+    runSQL (loadPost user slug) >>=
+    maybe (show404 user) (showFound)
+    where showFound (Entity _ post) = do
+            -- TODO Error handling
+            Just author <- loadUser (postDomain $ post)
+            myBlaze user "Post" $ View.Posts.show author post
+
+show (JsonRequested slug) user =
+    runSQL (loadPost user slug) >>=
+        --How about a JSON error?
+    maybe (show404 user) (json . entityVal)
+show _ user = show404 user
 
 -- TODO Multiple Tags
 tagged tag = undefined
