@@ -5,6 +5,7 @@ import Control.Monad.Logger
 import Control.Monad.Trans.Resource
 import qualified Data.Text as T
 import Database.Persist.Sqlite hiding (get)
+import Model.User
 import Network.HTTP.Types.Status
 import System.FilePath.Posix (splitExtension)
 import Text.Blaze.Html5 (Html)
@@ -23,6 +24,10 @@ runSQL :: SqlPersistT (NoLoggingT (ResourceT IO)) a -> WebAction a
 runSQL action =
     runQuery $ \conn ->
         runResourceT $ runNoLoggingT $ runSqlConn action conn
+
+loadUser :: T.Text -> WebAction (Maybe User)
+loadUser host = fmap (fmap entityVal) $ runSQL
+                    $ selectFirst [UserDomain ==. host] []
 
 requestedFormat :: T.Text -> RequestedFormat T.Text
 requestedFormat text = case (splitExtension $ T.unpack text) of

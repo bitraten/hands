@@ -12,8 +12,6 @@ import Network.URI (URI)
 import Database.Persist
 import Database.Persist.TH
 import Model.Fields
-import Util
-import Web.Spock
 
 share [mkPersist sqlSettings, mkMigrate "migrateUsers"] [persistLowerCase|
 User
@@ -42,7 +40,3 @@ instance FromJSON (UserGeneric backend) where
                                 u .: "locale" <*>
                                 u .: "url"
     parseJSON _ = mzero
-
-loadUser :: Text -> WebAction (Maybe User)
-loadUser host = fmap (fmap entityVal) $ runSQL
-                    $ selectFirst [UserDomain ==. host] []
