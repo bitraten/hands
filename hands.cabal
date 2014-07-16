@@ -34,6 +34,7 @@ executable hands
                        http-types,
                        monad-logger,
                        network,
+                       old-locale,
                        persistent,
                        persistent-sqlite,
                        persistent-template,
